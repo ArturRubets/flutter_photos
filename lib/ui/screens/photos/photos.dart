@@ -18,59 +18,76 @@ class Photos extends StatelessWidget {
     );
   }
 
+  Future<void> _onRefresh(BuildContext context) async {
+    context.read<PhotosBloc>().add(const PhotoFetched());
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) =>
           PhotosBloc(context.read<PhotoApiClient>(), context.read<String>())
             ..add(const PhotoFetched()),
-      child: BlocBuilder<PhotosBloc, PhotosState>(
-        builder: (context, state) {
-          switch (state.runtimeType) {
-            case PhotosStateInitial:
-            case PhotosStateLoading:
-              return const Center(child: CircularProgressIndicator());
-            case PhotosStateFailure:
-              return const Center(
-                child: Text('Failed to fetch data.'),
-              );
-          }
-
-          return state is PhotosStateSuccess
-              ? ListView.builder(
-                  itemCount: state.photos.length,
-                  itemBuilder: (_, index) {
-                    final sponsorName =
-                        state.photos[index].sponsorship?.sponsor?.name ??
-                            'Unknown';
-                    final description = state.photos[index].description;
-                    final urlThumb = state.photos[index].urls.thumb;
-                    final urlFull = state.photos[index].urls.full;
-
-                    return Card(
-                      child: InkWell(
-                        onTap: () => _onTap(context, urlFull),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: SizedBox(
-                            height: 120,
-                            child: Row(
-                              children: [
-                                _PhotoImage(urlThumb),
-                                const SizedBox(width: 8),
-                                _PhotoDescription(
-                                  sponsorName: sponsorName,
-                                  description: description,
-                                )
-                              ],
-                            ),
-                          ),
+      child: Builder(
+        builder: (context) {
+          return RefreshIndicator(
+            onRefresh: () => _onRefresh(context),
+            child: BlocBuilder<PhotosBloc, PhotosState>(
+              builder: (_, state) {
+                switch (state.runtimeType) {
+                  case PhotosStateInitial:
+                  case PhotosStateLoading:
+                    return const Center(child: CircularProgressIndicator());
+                  case PhotosStateFailure:
+                    return SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: SizedBox(
+                        height: MediaQuery.of(context).size.height,
+                        child: const Center(
+                          child: Text('Failed to fetch data.'),
                         ),
                       ),
                     );
-                  },
-                )
-              : const Center(child: Text('Error'));
+                }
+
+                return state is PhotosStateSuccess
+                    ? ListView.builder(
+                        itemCount: state.photos.length,
+                        itemBuilder: (_, index) {
+                          final sponsorName =
+                              state.photos[index].sponsorship?.sponsor?.name ??
+                                  'Unknown';
+                          final description = state.photos[index].description;
+                          final urlThumb = state.photos[index].urls.thumb;
+                          final urlFull = state.photos[index].urls.full;
+
+                          return Card(
+                            child: InkWell(
+                              onTap: () => _onTap(context, urlFull),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: SizedBox(
+                                  height: 120,
+                                  child: Row(
+                                    children: [
+                                      _PhotoImage(urlThumb),
+                                      const SizedBox(width: 8),
+                                      _PhotoDescription(
+                                        sponsorName: sponsorName,
+                                        description: description,
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      )
+                    : const Center(child: Text('Error'));
+              },
+            ),
+          );
         },
       ),
     );
