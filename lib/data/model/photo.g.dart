@@ -10,16 +10,16 @@ Photo _$PhotoFromJson(Map<String, dynamic> json) => Photo(
       id: json['id'] as String,
       description: json['description'] as String?,
       urls: Urls.fromJson(json['urls'] as Map<String, dynamic>),
-      sponsor: json['sponsor'] == null
+      sponsorship: json['sponsorship'] == null
           ? null
-          : Sponsor.fromJson(json['sponsor'] as Map<String, dynamic>),
+          : Sponsorship.fromJson(json['sponsorship'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$PhotoToJson(Photo instance) => <String, dynamic>{
       'id': instance.id,
       'description': instance.description,
       'urls': instance.urls,
-      'sponsor': instance.sponsor,
+      'sponsorship': instance.sponsorship,
     };
 
 Urls _$UrlsFromJson(Map<String, dynamic> json) => Urls(
@@ -30,6 +30,17 @@ Urls _$UrlsFromJson(Map<String, dynamic> json) => Urls(
 Map<String, dynamic> _$UrlsToJson(Urls instance) => <String, dynamic>{
       'full': instance.full,
       'thumb': instance.thumb,
+    };
+
+Sponsorship _$SponsorshipFromJson(Map<String, dynamic> json) => Sponsorship(
+      sponsor: json['sponsor'] == null
+          ? null
+          : Sponsor.fromJson(json['sponsor'] as Map<String, dynamic>),
+    );
+
+Map<String, dynamic> _$SponsorshipToJson(Sponsorship instance) =>
+    <String, dynamic>{
+      'sponsor': instance.sponsor,
     };
 
 Sponsor _$SponsorFromJson(Map<String, dynamic> json) => Sponsor(

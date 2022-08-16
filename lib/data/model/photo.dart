@@ -8,16 +8,16 @@ class Photo extends Equatable {
   final String id;
   final String? description;
   final Urls urls;
-  final Sponsor? sponsor;
+  final Sponsorship? sponsorship;
 
   @override
-  List<Object?> get props => [id, description, urls, sponsor];
+  List<Object?> get props => [id, description, urls, sponsorship];
 
   const Photo({
     required this.id,
     required this.description,
     required this.urls,
-    required this.sponsor,
+    required this.sponsorship,
   });
 
   factory Photo.fromJson(Map<String, dynamic> json) => _$PhotoFromJson(json);
@@ -41,6 +41,21 @@ class Urls extends Equatable {
   factory Urls.fromJson(Map<String, dynamic> json) => _$UrlsFromJson(json);
 
   Map<String, dynamic> toJson() => _$UrlsToJson(this);
+}
+
+@JsonSerializable()
+class Sponsorship extends Equatable {
+  final Sponsor? sponsor;
+
+  @override
+  List<Object?> get props => [sponsor];
+
+  const Sponsorship({required this.sponsor});
+
+  factory Sponsorship.fromJson(Map<String, dynamic> json) =>
+      _$SponsorshipFromJson(json);
+
+  Map<String, dynamic> toJson() => _$SponsorshipToJson(this);
 }
 
 @JsonSerializable()
