@@ -10,7 +10,7 @@ class App extends StatelessWidget {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        body: Photos(),
+        body: PhotosPage(),
       ),
     );
   }

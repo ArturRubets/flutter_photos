@@ -7,9 +7,16 @@ abstract class PhotosEvent extends Equatable {
   const PhotosEvent();
 }
 
-class PhotoFetched extends PhotosEvent {
+class PhotoFetchedFirstPage extends PhotosEvent {
   @override
   List<Object> get props => [];
 
-  const PhotoFetched();
+  const PhotoFetchedFirstPage();
+}
+
+class PhotoFetchedNextPage extends PhotosEvent {
+  @override
+  List<Object> get props => [];
+
+  const PhotoFetchedNextPage();
 }

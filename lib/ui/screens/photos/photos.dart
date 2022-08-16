@@ -5,10 +5,38 @@ import '../../../data/api_client.dart';
 import '../photo_detail/photo_detail.dart';
 import 'bloc/photos_bloc.dart';
 
-class Photos extends StatelessWidget {
-  const Photos({super.key});
+class PhotosPage extends StatelessWidget {
+  const PhotosPage({super.key});
 
-  void _onTap(BuildContext context, String urlFull) {
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) =>
+          PhotosBloc(context.read<PhotoApiClient>(), context.read<String>())
+            ..add(const PhotoFetchedFirstPage()),
+      child: const PhotosView(),
+    );
+  }
+}
+
+class PhotosView extends StatefulWidget {
+  const PhotosView({super.key});
+
+  @override
+  State<PhotosView> createState() => _PhotosViewState();
+}
+
+class _PhotosViewState extends State<PhotosView> {
+  final _scrollController = ScrollController();
+
+  bool get isBottom {
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+
+    return currentScroll >= (maxScroll * 0.9);
+  }
+
+  void _onTap(String urlFull) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) {
@@ -18,76 +46,98 @@ class Photos extends StatelessWidget {
     );
   }
 
-  Future<void> _onRefresh(BuildContext context) async {
-    context.read<PhotosBloc>().add(const PhotoFetched());
+  Future<void> _onRefresh() async {
+    context.read<PhotosBloc>().add(const PhotoFetchedFirstPage());
+  }
+
+  void _onScroll() {
+    if (isBottom) {
+      context.read<PhotosBloc>().add(const PhotoFetchedNextPage());
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_onScroll)
+      ..dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) =>
-          PhotosBloc(context.read<PhotoApiClient>(), context.read<String>())
-            ..add(const PhotoFetched()),
-      child: Builder(
-        builder: (context) {
-          return RefreshIndicator(
-            onRefresh: () => _onRefresh(context),
-            child: BlocBuilder<PhotosBloc, PhotosState>(
-              builder: (_, state) {
-                switch (state.runtimeType) {
-                  case PhotosStateInitial:
-                  case PhotosStateLoading:
-                    return const Center(child: CircularProgressIndicator());
-                  case PhotosStateFailure:
-                    return SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: SizedBox(
-                        height: MediaQuery.of(context).size.height,
-                        child: const Center(
-                          child: Text('Failed to fetch data.'),
+    return RefreshIndicator(
+      onRefresh: _onRefresh,
+      child: BlocBuilder<PhotosBloc, PhotosState>(
+        builder: (_, state) {
+          switch (state.runtimeType) {
+            case PhotosStateInitial:
+            case PhotosStateLoading:
+              return const Center(child: CircularProgressIndicator());
+            case PhotosStateFailure:
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height,
+                  child: const Center(
+                    child: Text('Failed to fetch data.'),
+                  ),
+                ),
+              );
+          }
+
+          return state is PhotosStateSuccess
+              ? ListView.builder(
+                  controller: _scrollController,
+                  itemCount: state.photos.length + 1,
+                  itemBuilder: (_, index) {
+                    if (index >= state.photos.length) {
+                      return const Center(
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 3),
+                        ),
+                      );
+                    }
+
+                    final sponsorName =
+                        state.photos[index].sponsorship?.sponsor?.name ??
+                            'Unknown';
+                    final description = state.photos[index].description;
+                    final urlThumb = state.photos[index].urls.thumb;
+                    final urlFull = state.photos[index].urls.full;
+
+                    return Card(
+                      child: InkWell(
+                        onTap: () => _onTap(urlFull),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: SizedBox(
+                            height: 120,
+                            child: Row(
+                              children: [
+                                _PhotoImage(urlThumb),
+                                const SizedBox(width: 8),
+                                _PhotoDescription(
+                                  sponsorName: sponsorName,
+                                  description: description,
+                                )
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     );
-                }
-
-                return state is PhotosStateSuccess
-                    ? ListView.builder(
-                        itemCount: state.photos.length,
-                        itemBuilder: (_, index) {
-                          final sponsorName =
-                              state.photos[index].sponsorship?.sponsor?.name ??
-                                  'Unknown';
-                          final description = state.photos[index].description;
-                          final urlThumb = state.photos[index].urls.thumb;
-                          final urlFull = state.photos[index].urls.full;
-
-                          return Card(
-                            child: InkWell(
-                              onTap: () => _onTap(context, urlFull),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: SizedBox(
-                                  height: 120,
-                                  child: Row(
-                                    children: [
-                                      _PhotoImage(urlThumb),
-                                      const SizedBox(width: 8),
-                                      _PhotoDescription(
-                                        sponsorName: sponsorName,
-                                        description: description,
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      )
-                    : const Center(child: Text('Error'));
-              },
-            ),
-          );
+                  },
+                )
+              : const Center(child: Text('Error'));
         },
       ),
     );
