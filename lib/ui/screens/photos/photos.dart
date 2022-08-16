@@ -50,10 +50,34 @@ class Photos extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Author: $sponsorName'),
+                                Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      const TextSpan(
+                                        text: 'Author: ',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      TextSpan(text: sponsorName),
+                                    ],
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                                 if (description != null)
-                                  Text(
-                                    'Description: $description',
+                                  Text.rich(
+                                    TextSpan(
+                                      children: [
+                                        const TextSpan(
+                                          text: 'Description: ',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        TextSpan(text: description),
+                                      ],
+                                    ),
                                     maxLines: 5,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -84,9 +108,7 @@ class _PhotoImage extends StatelessWidget {
     return Expanded(
       child: DecoratedBox(
         decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(
-            Radius.circular(8),
-          ),
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
           image: DecorationImage(
             image: NetworkImage(url),
             fit: BoxFit.cover,
