@@ -15,17 +15,21 @@ class PhotoDetail extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: Colors.black,
+        leading: const BackButton(),
       ),
-      body: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Colors.grey,
-          image: DecorationImage(
-            image: NetworkImage(url),
-            fit: BoxFit.cover,
+      body: Stack(
+        children: [
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: Colors.grey,
+              image: DecorationImage(
+                image: NetworkImage(url),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: const SizedBox.expand(),
           ),
-        ),
-        child: const SizedBox.expand(),
+        ],
       ),
     );
   }
