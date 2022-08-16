@@ -19,6 +19,7 @@ class PhotoDetail extends StatelessWidget {
       ),
       body: DecoratedBox(
         decoration: BoxDecoration(
+          color: Colors.grey,
           image: DecorationImage(
             image: NetworkImage(url),
             fit: BoxFit.cover,

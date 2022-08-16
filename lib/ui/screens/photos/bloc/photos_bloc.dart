@@ -12,12 +12,18 @@ class PhotosBloc extends Bloc<PhotosEvent, PhotosState> {
   final PhotoApiClient photoApiClient;
   final String clientId;
 
-  PhotosBloc(this.photoApiClient, this.clientId) : super(const PhotosState()) {
+  PhotosBloc(this.photoApiClient, this.clientId)
+      : super(const PhotosStateInitial()) {
     on<PhotoFetched>(_onPhotoFetched);
   }
 
   FutureOr<void> _onPhotoFetched(_, Emitter<PhotosState> emit) async {
-    final photos = await photoApiClient.photos(clientId);
-    emit(state.copyWith(photos: photos));
+    try {
+      emit(const PhotosStateLoading());
+      final photos = await photoApiClient.photos(clientId);
+      emit(PhotosStateSuccess(photos: photos));
+    } on Exception  {
+      emit(const PhotosStateFailure());
+    }
   }
 }

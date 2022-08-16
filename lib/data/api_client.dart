@@ -20,7 +20,8 @@ class PhotoApiClient {
       },
     );
 
-    final response = await _httpClient.get(request);
+    final response =
+        await _httpClient.get(request).timeout(const Duration(seconds: 5));
 
     if (response.statusCode != 200) {
       throw PhotoRequestFailure();

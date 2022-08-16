@@ -26,73 +26,100 @@ class Photos extends StatelessWidget {
             ..add(const PhotoFetched()),
       child: BlocBuilder<PhotosBloc, PhotosState>(
         builder: (context, state) {
-          return ListView.builder(
-            itemCount: state.photos.length,
-            itemBuilder: (_, index) {
-              final sponsorName =
-                  state.photos[index].sponsorship?.sponsor?.name ?? 'Unknown';
-              final description = state.photos[index].description;
-              final urlThumb = state.photos[index].urls.thumb;
-              final urlFull = state.photos[index].urls.full;
+          switch (state.runtimeType) {
+            case PhotosStateInitial:
+            case PhotosStateLoading:
+              return const Center(child: CircularProgressIndicator());
+            case PhotosStateFailure:
+              return const Center(
+                child: Text('Failed to fetch data.'),
+              );
+          }
 
-              return Card(
-                child: InkWell(
-                  onTap: () => _onTap(context, urlFull),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: SizedBox(
-                      height: 120,
-                      child: Row(
-                        children: [
-                          _PhotoImage(urlThumb),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+          return state is PhotosStateSuccess
+              ? ListView.builder(
+                  itemCount: state.photos.length,
+                  itemBuilder: (_, index) {
+                    final sponsorName =
+                        state.photos[index].sponsorship?.sponsor?.name ??
+                            'Unknown';
+                    final description = state.photos[index].description;
+                    final urlThumb = state.photos[index].urls.thumb;
+                    final urlFull = state.photos[index].urls.full;
+
+                    return Card(
+                      child: InkWell(
+                        onTap: () => _onTap(context, urlFull),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: SizedBox(
+                            height: 120,
+                            child: Row(
                               children: [
-                                Text.rich(
-                                  TextSpan(
-                                    children: [
-                                      const TextSpan(
-                                        text: 'Author: ',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      TextSpan(text: sponsorName),
-                                    ],
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                if (description != null)
-                                  Text.rich(
-                                    TextSpan(
-                                      children: [
-                                        const TextSpan(
-                                          text: 'Description: ',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        TextSpan(text: description),
-                                      ],
-                                    ),
-                                    maxLines: 5,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                                _PhotoImage(urlThumb),
+                                const SizedBox(width: 8),
+                                _PhotoDescription(
+                                  sponsorName: sponsorName,
+                                  description: description,
+                                )
                               ],
                             ),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
+                    );
+                  },
+                )
+              : const Center(child: Text('Error'));
         },
+      ),
+    );
+  }
+}
+
+class _PhotoDescription extends StatelessWidget {
+  final String sponsorName;
+  final String? description;
+
+  const _PhotoDescription({
+    required this.sponsorName,
+    required this.description,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text.rich(
+            TextSpan(
+              children: [
+                const TextSpan(
+                  text: 'Author: ',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                TextSpan(text: sponsorName)
+              ],
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          if (description != null)
+            Text.rich(
+              TextSpan(
+                children: [
+                  const TextSpan(
+                    text: 'Description: ',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(text: description)
+                ],
+              ),
+              maxLines: 5,
+              overflow: TextOverflow.ellipsis,
+            )
+        ],
       ),
     );
   }
@@ -113,6 +140,7 @@ class _PhotoImage extends StatelessWidget {
             image: NetworkImage(url),
             fit: BoxFit.cover,
           ),
+          color: Colors.grey,
         ),
         child: const SizedBox.expand(),
       ),
