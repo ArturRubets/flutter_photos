@@ -11,12 +11,13 @@ class PhotoApiClient {
   PhotoApiClient({http.Client? httpClient})
       : _httpClient = httpClient ?? http.Client();
 
-  Future<List<Photo>> photos(String clientId) async {
+  Future<List<Photo>> photos(String clientId, int page) async {
     final request = Uri.https(
       Configuration.baseUrl,
       'photos',
       <String, String>{
         'client_id': clientId,
+        'page': '$page',
       },
     );
 

@@ -1,6 +1,8 @@
 part of 'photos_bloc.dart';
 
 abstract class PhotosState extends Equatable {
+  static const int page = 1;
+
   @override
   List<Object> get props;
 
@@ -25,17 +27,20 @@ class PhotosStateLoading extends PhotosState {
 
 class PhotosStateSuccess extends PhotosState {
   final List<Photo> photos;
+  final int page;
 
   @override
-  List<Object> get props => [photos];
+  List<Object> get props => [photos, page];
 
-  const PhotosStateSuccess({required this.photos});
+  const PhotosStateSuccess({required this.photos, required this.page});
 
   PhotosStateSuccess copyWith({
     List<Photo>? photos,
+    int? page,
   }) {
     return PhotosStateSuccess(
       photos: photos ?? this.photos,
+      page: page ?? this.page,
     );
   }
 }

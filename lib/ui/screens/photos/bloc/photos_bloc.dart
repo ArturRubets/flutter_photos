@@ -28,8 +28,9 @@ class PhotosBloc extends Bloc<PhotosEvent, PhotosState> {
   FutureOr<void> _onPhotoFetchedFirstPage(_, Emitter<PhotosState> emit) async {
     try {
       emit(const PhotosStateLoading());
-      final photos = await photoApiClient.photos(clientId);
-      emit(PhotosStateSuccess(photos: photos));
+      const currentPage = PhotosState.page;
+      final photos = await photoApiClient.photos(clientId, currentPage);
+      emit(PhotosStateSuccess(photos: photos, page: currentPage));
     } on Exception {
       emit(const PhotosStateFailure());
     }
@@ -39,10 +40,10 @@ class PhotosBloc extends Bloc<PhotosEvent, PhotosState> {
     try {
       final stateLocal = state;
       if (stateLocal is PhotosStateSuccess) {
-        await Future.delayed(Duration(seconds: 2));
-        final photos = await photoApiClient.photos(clientId);
+        final currentPage = stateLocal.page + 1;
+        final photos = await photoApiClient.photos(clientId, currentPage);
         final newPhotos = List<Photo>.from(stateLocal.photos)..addAll(photos);
-        emit(PhotosStateSuccess(photos: newPhotos));
+        emit(PhotosStateSuccess(photos: newPhotos, page: currentPage));
       }
     } on Exception {
       emit(const PhotosStateFailure());
