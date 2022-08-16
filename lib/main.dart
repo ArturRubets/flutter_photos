@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 
-void main() {
+import 'data/api_client.dart';
+import 'data/configuration.dart';
+
+void main() async {
+  final client = PhotoApiClient();
+  final photos = await client.photos(Configuration.clientId);
   runApp(const App());
 }
 
 class App extends StatelessWidget {
-  const App({Key? key}) : super(key: key);
+  const App({super.key});
 
   @override
   Widget build(BuildContext context) {
